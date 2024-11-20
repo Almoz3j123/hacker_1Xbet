@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اسكربت لعبه الكوبايه</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            background-color: #000; /* خلفية سوداء */
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .cup {
+            width: 80px;
+            height: 50px;
+            background: #A9A9A9; /* لون رمادي للكوب */
+            margin: 20px;
+            position: relative;
+            border-radius: 10px 10px 0 0;
+            display: inline-block;
+            transition: transform 1s;
+        }
+        .ball {
+            width: 30px;
+            height: 30px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            left: 25px;
+            display: none;
+        }
+        .hidden {
+            display: none;
+        }
+        #buttons {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center; /* جعل الأزرار في المنتصف */
+        }
+        button {
+            padding: 15px 30px; /* تحسين حجم الأزرار */
+            margin: 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px; /* تحسين حجم الخط */
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.1); /* تأثير تكبير عند المرور */
+        }
+        .animation {
+            animation: spin 2s;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .game-container {
+            display: none;
+            justify-content: center; /* جعل الكوب في المنتصف */
+        }
+        .score {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .info-box {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #444; /* لون خلفية المربع */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .header-text {
+            position: absolute;
+            top: 20px;
+            right: 20px; /* تغيير الموضع لليمين */
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            color: #FFD700; /* لون الجملة */
+        }
+        .user-count {
+            color: #00FF00; /* لون العدد */
+        }
+        .user-number {
+            color: #FF0000; /* لون الأرقام */
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-text">
+    عدد مستخدمين السكربت: <span class="user-number">27000</span> مستخدم
+</div>
+<h1>تخمين الكرة تحت الكوبايه</h1>
+<div class="score" id="scoreBoard">
+    <p id="correctCount">التخمينات الصحيحة: 0</p>
+    <p id="incorrectCount">التخمينات الخاطئة: 0</p>
+</div>
+
+<div id="buttons">
+    <button onclick="startGame(1)">اللعب بكوره واحده</button>
+    <button onclick="startGame(2)">اللعب بالكورتين اضمن</button>
+</div>
+
+<div class="game-container" id="gameContainer">
+    <div class="cup" id="cup1" onclick="guess(1)"><div class="ball" id="ball1"></div></div>
+    <div class="cup" id="cup2" onclick="guess(2)"><div class="ball" id="ball2"></div></div>
+    <div class="cup" id="cup3" onclick="guess(3)"><div class="ball" id="ball3"></div></div>
+</div>
+
+<p id="result"></p>
+<button id="restartButton" class="hidden" onclick="restartGame()">لعب مرة أخرى</button>
+
+<div class="info-box">
+    مصمم اللعبة هو <strong>المزعج الحاكم</strong>
+    <br>
+    <button onclick="window.location.href='https://t.me/Z_Y_Y_S'">مراسلة المطور</button>
+    <p style="margin-top: 10px; color: #FFD700;">إذا علق معك السكربت راسلني أعطيك الأوقات المضمونة للاعب عشان السرفر بيكون عاليه ضغط</p>
+</div>
+
+<script>
+    let ballPositions = [];
+    let gameType = 1;
+    let correctGuesses = 0;
+    let incorrectGuesses = 0;
+
+    function startGame(type) {
+        gameType = type;
+        document.getElementById('buttons').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'flex';
+        document.getElementById('result').innerText = '';
+        document.getElementById('restartButton').classList.add('hidden');
+        animateCups();
+    }
+
+    function animateCups() {
+        const cups = document.querySelectorAll('.cup');
+        cups.forEach(cup => {
+            cup.classList.add('animation');
+        });
+
+        setTimeout(() => {
+            cups.forEach(cup => {
+                cup.classList.remove('animation');
+            });
+            placeBalls();
+        }, 2000);
+    }
+
+    function placeBalls() {
+        ballPositions = [];
+        const ball1Pos = Math.floor(Math.random() * 3) + 1; // وضع كرة عشوائية
+        ballPositions.push(ball1Pos);
+        if (gameType === 2) {
+            let ball2Pos;
+            do {
+                ball2Pos = Math.floor(Math.random() * 3) + 1;
+            } while (ball2Pos === ball1Pos);
+            ballPositions.push(ball2Pos);
+        }
+        showBalls();
+    }
+
+    function showBalls() {
+        for (let i = 1; i <= 3; i++) {
+            const ball = document.getElementById('ball' + i);
+            if (ballPositions.includes(i)) {
+                ball.style.display = 'block';
+            } else {
+                ball.style.display = 'none';
+            }
+        }
+    }
+
+    function guess(cup) {
+        if (ballPositions.includes(cup)) {
+            correctGuesses++;
+            document.getElementById('result').innerText = 'هذا هوا التخمين الصحيح';
+        } else {
+            incorrectGuesses++;
+            document.getElementById('result').innerText = 'حصلت علي التخمين الصحيح لكن لم تضغط علي الخانه';
+        }
+        updateScore();
+        revealCups(cup);
+    }
+
+    function revealCups(selectedCup) {
+        const cups = document.querySelectorAll('.cup');
+        cups.forEach((cup, index) => {
+            cup.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cup.style.transform = 'scale(1)';
+                if (ballPositions.includes(index + 1)) {
+                    cup.querySelector('.ball').style.display = 'block';
+                } else {
+                    cup.querySelector('.ball').style.display = 'none';
+                }
+            }, 500);
+        });
+        document.getElementById('restartButton').classList.remove('hidden');
+    }
+
+    function restartGame() {
+        document.getElementById('buttons').style.display = 'block';
+        document.getElementById('gameContainer').style.display = 'none';
+        document.getElementById('result').innerText = '';
+        document.getElementById('restartButton').classList.add('hidden');
+    }
+
+    function updateScore() {
+        document.getElementById('correctCount').innerText = 'اختيارات الكوبايه الصحيه: ' + correctGuesses;
+        document.getElementById('incorrectCount').innerText = 'اختيارك الخطاء: ' + incorrectGuesses;
+    }
+</script>
+
+</body>
+</html>
